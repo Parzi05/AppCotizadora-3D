@@ -118,6 +118,16 @@ html.lock,html.lock body{overflow:hidden;overscroll-behavior:none}
 .cs-o.act{color:var(--ac);font-weight:700}
 details.ord{padding:12px}
 details.ord summary{cursor:pointer;font-size:15px}
+.ti{width:44px;height:44px;border-radius:10px;object-fit:cover;flex:none;background:var(--card);display:inline-flex;align-items:center;justify-content:center;font-size:20px;vertical-align:middle}
+.ti.thb{width:56px;height:56px;font-size:26px}
+.ti.sm{width:26px;height:26px;margin-right:8px;border-radius:8px}
+.mbox img.ti{width:44px;max-height:44px;margin:0 8px 0 0;border-radius:10px}
+.mbox img.ti.thb{width:56px;max-height:56px}
+.mbox img.ti.sm{width:26px;max-height:26px}
+.imgrow{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin-top:8px}
+.frow{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 2px}
+.chp{width:auto;min-height:34px;padding:0 12px;font-size:13px;font-weight:400;border-radius:99px;background:var(--card2);color:var(--tx);border:1px solid var(--bd)}
+.chp.on{background:var(--ac);color:#0b0f17;border-color:var(--ac);font-weight:700}
 </style>
 </head>
 <body>
@@ -155,13 +165,17 @@ details.ord summary{cursor:pointer;font-size:15px}
   <div id="mode-q"><div class="card">
     <label>Impresora 3D (solo activas)</label>
     <select id="printer"></select>
-    <label>Paso 1 · Tipo de material</label>
+    <div id="printer-pv"></div>
+    <label>Paso 1 · Material</label>
     <select id="f1"></select>
-    <label>Paso 2 · Color del filamento</label>
+    <label>Paso 2 · Subclase / variante</label>
+    <select id="f1s"></select>
+    <label>Paso 3 · Color del filamento</label>
     <div class="cs"><button type="button" class="cs-btn" id="f2b"></button><div class="cs-list" id="f2l"></div></div>
-    <label>Paso 3 · Marca del filamento</label>
+    <label>Paso 4 · Marca del filamento</label>
     <select id="f3"></select>
     <div class="hint" id="filhint"></div>
+    <div id="fil-pv"></div>
     <label>Cantidad de piezas</label>
     <input id="qty" type="number" inputmode="numeric" min="1" value="1">
     <div class="warn" id="q-disc" style="margin-top:8px"></div>
@@ -357,6 +371,15 @@ details.ord summary{cursor:pointer;font-size:15px}
 
 <section id="t-prn" class="tab">
   <h1>🖨️ Impresoras 3D</h1>
+  <div class="card" id="pf-bar">
+    <input id="pf-q" type="text" placeholder="🔍 Buscar por nombre, marca o material">
+    <div class="hint" style="margin-top:10px">Estado</div><div class="frow" id="pf-st"></div>
+    <div class="hint">Sistema</div><div class="frow" id="pf-sy"></div>
+    <div class="hint">Material que soporta</div><div class="frow" id="pf-m"></div>
+    <div class="hint">Marca</div><div class="frow" id="pf-b"></div>
+    <div class="btns"><button id="pf-clr" class="sec xs" style="width:auto">Limpiar filtros</button></div>
+    <div class="hint" id="pf-n"></div>
+  </div>
   <div id="plist"></div>
   <h2 id="ftitle">Agregar impresora</h2>
   <div class="card">
@@ -380,6 +403,9 @@ details.ord summary{cursor:pointer;font-size:15px}
     <label>Materiales que soporta</label>
     <div id="p-mats"></div>
     <div class="row" style="margin-top:8px"><input id="p-newmat" type="text" placeholder="Agregar otro material"><button type="button" id="p-addmat" class="sec" style="flex:none;width:96px">+ Añadir</button></div>
+    <label>Foto de la impresora (opcional)</label>
+    <div class="imgrow"><div id="p-imgv"></div><button type="button" id="p-imgb" class="sec xs" style="width:auto">🖼️ Subir foto</button><button type="button" id="p-imgcb" class="sec xs" style="width:auto">📸 Tomar foto</button><button type="button" id="p-imgx" class="bad xs" style="width:auto">✕ Quitar</button></div>
+    <input type="file" id="p-imgf" accept="image/*" hidden><input type="file" id="p-imgc" accept="image/*" capture="environment" hidden>
     <div class="btns">
       <button id="p-save" class="ok">Guardar</button>
       <button id="p-cancel" class="sec" style="display:none">Cancelar</button>
@@ -389,21 +415,37 @@ details.ord summary{cursor:pointer;font-size:15px}
 
 <section id="t-fil" class="tab">
   <h1>🧵 Catálogo de Filamentos</h1>
+  <div class="card" id="ff-bar">
+    <input id="ff-q" type="text" placeholder="🔍 Buscar por material, subclase, marca o color">
+    <div class="hint" style="margin-top:10px">Estado</div><div class="frow" id="ff-st"></div>
+    <div class="hint">Material</div><div class="frow" id="ff-t"></div>
+    <div class="hint">Subclase</div><div class="frow" id="ff-s"></div>
+    <div class="hint">Marca</div><div class="frow" id="ff-b"></div>
+    <div class="btns"><button id="ff-clr" class="sec xs" style="width:auto">Limpiar filtros</button></div>
+    <div class="hint" id="ff-n"></div>
+  </div>
   <div id="flist"></div>
   <h2 id="fftitle">Agregar filamento</h2>
   <div class="card">
-    <label>Tipo de material</label>
+    <label>1 · Tipo de material base</label>
     <select id="f-type"></select>
     <input id="f-newtype" type="text" placeholder="¿No está en la lista? Escribe un material nuevo" style="margin-top:8px">
-    <label>Marca</label>
-    <input id="f-brand" type="text" placeholder="Ej. Eryone, Creality, Sunlu">
-    <label>Color / variante</label>
+    <label>2 · Subclase / variante</label>
+    <select id="f-sub"></select>
+    <input id="f-newsub" type="text" placeholder="¿No está? Escribe una subclase nueva (Ej. Silk Dual)" style="margin-top:8px">
+    <label>3 · Marca</label>
+    <input id="f-brand" type="text" placeholder="Ej. Elegoo, Flashforge, Sunlu">
+    <div class="frow" id="f-brands"></div>
+    <label>4 · Color</label>
     <div class="row"><input id="f-color" type="text" placeholder="Ej. Verde Oscuro"><input id="f-hex" type="color" class="hex" value="#4f9dff" aria-label="Color real"></div>
     <div class="row">
-      <div><label>Precio por carrete (MXN)</label><input id="f-price" type="number" inputmode="decimal" step="0.01" placeholder="560.00"></div>
       <div><label>Peso del carrete (g)</label><input id="f-weight" type="number" inputmode="decimal" step="1" value="1000"></div>
+      <div><label>Precio por carrete (MXN)</label><input id="f-price" type="number" inputmode="decimal" step="0.01" placeholder="560.00"></div>
     </div>
     <div class="gcost" id="f-gcost"></div>
+    <label>Imagen del carrete (opcional)</label>
+    <div class="imgrow"><div id="f-imgv"></div><button type="button" id="f-imgb" class="sec xs" style="width:auto">🖼️ Subir foto</button><button type="button" id="f-imgcb" class="sec xs" style="width:auto">📸 Tomar foto</button><button type="button" id="f-imgx" class="bad xs" style="width:auto">✕ Quitar</button></div>
+    <input type="file" id="f-imgf" accept="image/*" hidden><input type="file" id="f-imgc" accept="image/*" capture="environment" hidden>
     <div class="btns">
       <button id="f-save" class="ok">Guardar</button>
       <button id="f-cancel" class="sec" style="display:none">Cancelar</button>
@@ -460,6 +502,7 @@ details.ord summary{cursor:pointer;font-size:15px}
 
 <div class="modal" id="m2"><div class="mbox"><div id="m2body"></div><div class="btns"><button id="m2x" class="sec">Cerrar</button></div></div></div>
 <div class="modal" id="m3"><div class="mbox"><div id="m3body"></div><div class="btns"><button id="m3x" class="sec">Cancelar</button></div></div></div>
+<div class="modal" id="m4"><div class="mbox"><div id="m4body"></div><div class="btns"><button id="m4x" class="sec">Cancelar</button></div></div></div>
 <input type="file" id="phu" accept="image/*" hidden>
 <div class="modal" id="modal"><div class="mbox"><div id="mbody"></div>
   <div class="btns"><button id="mwa" class="ok">📋 Copiar cotización para WhatsApp</button></div>
@@ -490,6 +533,24 @@ var KEY="cot3d_v1",HKEY="cot3d_hist_v1";
 var MATS=["PLA","PLA+","PETG","ABS","ASA","TPU","Nylon (PA)","Policarbonato (PC)","HIPS","PVA","Polipropileno (PP)","PEEK","PEI (ULTEM)","PCTG","PLA-CF","PETG-CF","PA-CF","PA-GF","PC-CF"];
 var HEX={negro:"#1b1b1b",blanco:"#f2f2f2",rojo:"#e53935",azul:"#1e63e9",verde:"#2eaa4a","verde oscuro":"#14532d",morado:"#7e3ff2",amarillo:"#f6c90e",naranja:"#f57c00",gris:"#8d8d8d",rosa:"#f06fa8",cafe:"#6d4c41","café":"#6d4c41",transparente:"#cfe8ef",dorado:"#d4af37",plata:"#c0c0c0",plateado:"#c0c0c0",turquesa:"#1bbfb0",celeste:"#5bc0f0",beige:"#d9c7a3"};
 function guessHex(n){return HEX[String(n).trim().toLowerCase()]||"#8b93a5"}
+/* ===== Material base + subclase / variante ===== */
+var LEG={"PLA+":["PLA","PLA+"],"PLA-CF":["PLA","PLA-CF"],"PETG-CF":["PETG","PETG-CF"],"PA-CF":["Nylon (PA)","PA-CF"],"PA-GF":["Nylon (PA)","PA-GF"],"PC-CF":["Policarbonato (PC)","PC-CF"]};
+var SUBS={"PLA":["Estándar","PLA+","PLA Rapid","PLA+ Rapid","PLA HF","PLA-CF","PLA Madera","Silk","Mate"],"PETG":["Estándar","PETG-CF","PETG Rapid","PETG HF","Translúcido"],"ABS":["Estándar","ABS-CF"],"ASA":["Estándar","ASA-CF"],"TPU":["Estándar","95A","90A","85A"],"Nylon (PA)":["Estándar","PA-CF","PA-GF"],"Policarbonato (PC)":["Estándar","PC-CF"]};
+function isStd(s){return !s||/^est[aá]ndar$/i.test(s)}
+function tcode(t){var m=/\(([^)]+)\)/.exec(t);return m?m[1]:t}
+/* nombre corto del material con su subclase: PLA, PLA+, PLA Silk, TPU 95A… */
+function mLabel(f){var s=f.sub;if(isStd(s))return f.type;var a=String(s).toUpperCase();return (a.indexOf(tcode(f.type).toUpperCase())===0||a.indexOf(String(f.type).toUpperCase())===0)?s:f.type+" "+s}
+/* etiqueta con la que se compara contra los materiales que soporta cada impresora */
+function cLabel(f){var s=f.sub;return (!isStd(s)&&s!==f.type&&allMats().indexOf(s)>-1)?s:f.type}
+function legMap(t){return LEG[t]||null}
+function migFil(f){
+  if(f.active===undefined)f.active=true;
+  if(!f.sub){var lg=LEG[f.type];if(lg){f.type=lg[0];f.sub=lg[1]}else f.sub="Estándar"}
+  if(!f.hex)f.hex=guessHex(f.color);
+  if(!f.rolls)f.rolls=[{id:"r"+f.id,g:f.weight}];
+  return f;
+}
+function subSort(a,b){var A=isStd(a.sub)?0:1,B=isStd(b.sub)?0:1;return A-B||String(a.sub).localeCompare(String(b.sub))}
 var DEF_CFG={fil:560,kwh:4.5,post:8,risk:10,mult:2.2,labor:50,prep:10,pbag:8,ppap:2,pcard:3,prib:2,ship:0,d1q:6,d1p:12,d2q:21,d2p:20,d3q:50,d3p:25,pn:25,pm:20,pd:55};
 /* Perfiles precargados: 2 × Flashforge Creator 5 Pro ($16,739 c/u · 5,000 h de vida útil · 0.35 kW · multi-cabezal) */
 var CF5_MATS=["PLA","PLA+","PETG","ABS","ASA","TPU","PVA","HIPS","PLA-CF"];
@@ -501,7 +562,7 @@ function cf5(){
 var S={cfg:Object.assign({},DEF_CFG),
   printers:[{id:"p1",name:"Flashforge Adventurer 5M Pro",kw:0.15,wear:3.33,active:true,mats:["PLA","PETG","TPU","ABS","ASA","PLA-CF"]}].concat(cf5()),
   filaments:[{id:"f1",type:"PLA",brand:"Genérico",color:"Negro",price:560,weight:1000,active:true}],
-  sel:"p1",fil:"",fType:null,fColor:"",fBrand:"",customMats:[],clients:[],supplies:[],profiles:[],sup:{post:[],bed:[],ov:{},area:""},seeded:false,tm:null,pcs:[],mode:"q",gh:"",gm:"",gf:"",adv:{purge:"",pl:[]},mod:0,dirty:false,hist:[],photo:"",view:"",pt:"",last:null,pk:{on:false,n:"1",ship:false,sc:""},editId:"",seedCF:false};
+  sel:"p1",fil:"",fType:null,fSub:"",fColor:"",fBrand:"",customMats:[],clients:[],supplies:[],profiles:[],sup:{post:[],bed:[],ov:{},area:""},seeded:false,tm:null,pcs:[],mode:"q",gh:"",gm:"",gf:"",adv:{purge:"",pl:[]},mod:0,dirty:false,hist:[],photo:"",view:"",pt:"",last:null,pk:{on:false,n:"1",ship:false,sc:""},editId:"",seedCF:false};
 var editP=null,editF=null;
 
 function load(){
@@ -517,7 +578,7 @@ function load(){
     if(Array.isArray(d.supplies))S.supplies=d.supplies;if(Array.isArray(d.profiles))S.profiles=d.profiles;
     if(d.sup)S.sup=Object.assign({post:[],bed:[],ov:{},area:""},d.sup);S.seeded=!!d.seeded;if(d.mode)S.mode=d.mode;S.gh=d.gh||"";S.gm=d.gm||"";S.gf=d.gf||"";
     if(d.adv)S.adv=d.adv;
-    if(d.fType!==undefined)S.fType=d.fType;if(d.fColor)S.fColor=d.fColor;if(d.fBrand)S.fBrand=d.fBrand;}}catch(e){}
+    if(d.fType!==undefined)S.fType=d.fType;if(d.fSub)S.fSub=d.fSub;if(d.fColor)S.fColor=d.fColor;if(d.fBrand)S.fBrand=d.fBrand;}}catch(e){}
   try{var hh=localStorage.getItem(HKEY);if(hh)S.hist=JSON.parse(hh)||[]}catch(e){}
   if(!S.seedCF){ // una sola vez: agrega las 2 Creator 5 Pro a instalaciones que ya tenían datos (si luego las borras, no vuelven)
     if(!S.printers.some(function(p){return /creator\s*5\s*pro/i.test(p.name||"")})){S.printers=S.printers.concat(cf5());S.mod=Date.now();S.dirty=true}
@@ -531,7 +592,7 @@ function load(){
     if(!p.mats)p.mats=["PLA","PETG","TPU","ABS","ASA","PLA-CF"];
     p.mats=p.mats.map(mig);
   });
-  S.filaments.forEach(function(f){if(f.active===undefined)f.active=true;f.type=mig(f.type);if(!f.hex)f.hex=guessHex(f.color);if(!f.rolls)f.rolls=[{id:"r"+f.id,g:f.weight}]});
+  S.filaments.forEach(function(f){f.type=mig(f.type);migFil(f)});
   if(!S.seeded)seed();
   S.lastSP=synPart();
 }
@@ -541,7 +602,7 @@ function save(){
   var sp=synPart();
   if(S.lastSP!==undefined&&sp!==S.lastSP){S.mod=Date.now();S.dirty=true;schedSync()}
   S.lastSP=sp;
-  try{localStorage.setItem(KEY,JSON.stringify({cfg:S.cfg,printers:S.printers,filaments:S.filaments,sel:S.sel,fil:S.fil,fType:S.fType,fColor:S.fColor,fBrand:S.fBrand,customMats:S.customMats,mod:S.mod,dirty:S.dirty,pcs:S.pcs,mode:S.mode,gh:S.gh,gm:S.gm,gf:S.gf,adv:S.adv,clients:S.clients,supplies:S.supplies,profiles:S.profiles,sup:S.sup,seeded:S.seeded,seedCF:S.seedCF,pk:S.pk}))}catch(e){}
+  try{localStorage.setItem(KEY,JSON.stringify({cfg:S.cfg,printers:S.printers,filaments:S.filaments,sel:S.sel,fil:S.fil,fType:S.fType,fSub:S.fSub,fColor:S.fColor,fBrand:S.fBrand,customMats:S.customMats,mod:S.mod,dirty:S.dirty,pcs:S.pcs,mode:S.mode,gh:S.gh,gm:S.gm,gf:S.gf,adv:S.adv,clients:S.clients,supplies:S.supplies,profiles:S.profiles,sup:S.sup,seeded:S.seeded,seedCF:S.seedCF,pk:S.pk}))}catch(e){}
 }
 function num(v,d){var n=parseFloat(String(v).replace(",","."));return isNaN(n)?(d||0):n}
 function mxn(n){return "$"+n.toLocaleString("es-MX",{minimumFractionDigits:2,maximumFractionDigits:2})}
@@ -550,7 +611,7 @@ function esc(s){return String(s).replace(/[&<>"']/g,function(c){return {"&":"&am
 function pf(id){return S.printers.find(function(x){return x.id===id})}
 function ff(id){return S.filaments.find(function(x){return x.id===id})}
 function gcost(f){return f.weight>0?f.price/f.weight:0}
-function fname(f){return f.type+" · "+f.brand+(f.color?" · "+f.color:"")}
+function fname(f){return mLabel(f)+" · "+f.brand+(f.color?" · "+f.color:"")}
 
 
 /* Parámetros */
@@ -567,7 +628,7 @@ function slots(p){return p&&(p.mm==="ams"||p.mm==="dual")?Infinity:1}
 function isMM(p){return slots(p)>1}
 function mmLabel(p){return p.mm==="ams"?"🎨 Cambio de filamento (AMS/CFS/MMU)":(p.mm==="dual"?"🛠️ Multi-cabezal (IDEX)":"Monocolor")}
 function getPrn(){var a=activePrinters();return a.find(function(p){return p.id===S.sel})||a[0]||null}
-function compat(p){return p?S.filaments.filter(function(f){return f.active&&p.mats.indexOf(f.type)>-1}):[]}
+function compat(p){return p?S.filaments.filter(function(f){return f.active&&p.mats.indexOf(cLabel(f))>-1}):[]}
 function renderQ(){
   var ap=activePrinters(),ps=$("printer");
   if(!ap.length){ps.innerHTML='<option value="">Sin impresoras activas</option>'}
@@ -578,14 +639,26 @@ function renderQ(){
   renderFilSel();
 }
 function uniq(a,k){var s=[],o=[];a.forEach(function(f){if(s.indexOf(f[k])<0){s.push(f[k]);o.push(f)}});return o}
+function pvRow(p,fl){
+  var h="";
+  if(p&&p.img)h+='<span style="display:inline-flex;align-items:center"><img class="ti" src="'+p.img+'" alt=""><small style="color:var(--mut)">'+esc(p.name)+'</small></span>';
+  if(fl&&fl.img)h+='<span style="display:inline-flex;align-items:center"><img class="ti" src="'+fl.img+'" alt=""><small style="color:var(--mut)">'+esc(fname(fl))+'</small></span>';
+  return h?'<div class="imgrow">'+h+'</div>':"";
+}
 function renderFilSel(){
-  var p=getPrn(),list=compat(p),types=uniq(list,"type");
+  var p=getPrn(),lg=legMap(S.fType);
+  if(lg){S.fType=lg[0];S.fSub=lg[1]}
+  var list=compat(p),types=uniq(list,"type");
   if(!S.fType||!types.some(function(f){return f.type===S.fType}))S.fType=types.length?types[0].type:"";
   $("f1").innerHTML=''+types.map(function(f){return '<option value="'+esc(f.type)+'">'+esc(f.type)+'</option>'}).join("");
   $("f1").value=S.fType;
-  var byT=S.fType?list.filter(function(f){return f.type===S.fType}):[],cols=uniq(byT,"color");
+  var byT=S.fType?list.filter(function(f){return f.type===S.fType}):[],subs=uniq(byT,"sub").sort(subSort);
+  if(!subs.some(function(f){return f.sub===S.fSub}))S.fSub=subs.length?subs[0].sub:"";
+  $("f1s").innerHTML=subs.map(function(f){return '<option value="'+esc(f.sub)+'">'+esc(f.sub)+'</option>'}).join("");
+  $("f1s").value=S.fSub;$("f1s").disabled=!subs.length;
+  var byS=byT.filter(function(f){return f.sub===S.fSub}),cols=uniq(byS,"color");
   if(!cols.some(function(f){return f.color===S.fColor}))S.fColor=cols.length?cols[0].color:"";
-  var byC=byT.filter(function(f){return f.color===S.fColor}),brs=uniq(byC,"brand");
+  var byC=byS.filter(function(f){return f.color===S.fColor}),brs=uniq(byC,"brand");
   if(!brs.some(function(f){return f.brand===S.fBrand}))S.fBrand=brs.length?brs[0].brand:"";
   var fl=byC.find(function(f){return f.brand===S.fBrand});
   S.fil=fl?fl.id:"";
@@ -596,9 +669,11 @@ function renderFilSel(){
   $("f3").innerHTML=brs.length?brs.map(function(f){return '<option value="'+esc(f.brand)+'">'+esc(f.brand)+' — '+mxn(gcost(f))+'/g</option>'}).join(""):'<option value="">—</option>';
   $("f3").value=S.fBrand;$("f3").disabled=!brs.length;
   $("filhint").textContent=!p?"Activa una impresora en la pestaña Impresoras.":(!list.length?"Ningún filamento activo es compatible con esta impresora; agrega o activa uno en Filamentos.":(fl?"Filamento seleccionado: "+mxn(gcost(fl))+" por gramo.":"Elige un filamento del catálogo."));
+  $("printer-pv").innerHTML=pvRow(p,null);$("fil-pv").innerHTML=pvRow(null,fl);
   renderPcs();renderAdv();renderSupCard();save();
 }
 $("f1").onchange=function(){S.fType=$("f1").value;renderFilSel()};
+$("f1s").onchange=function(){S.fSub=$("f1s").value;renderFilSel()};
 $("f3").onchange=function(){S.fBrand=$("f3").value;renderFilSel()};
 $("f2b").onclick=function(e){e.stopPropagation();$("f2l").classList.toggle("open")};
 $("f2l").onclick=function(e){var o=e.target.closest(".cs-o");if(!o)return;S.fColor=o.dataset.c;$("f2l").classList.remove("open");renderFilSel()};
@@ -609,7 +684,7 @@ $("printer").onchange=function(){S.sel=$("printer").value;S.fil="";renderFilSel(
 function allMats(){return MATS.concat(S.customMats)}
 function addMat(n){n=String(n).trim();if(!n)return "";var f=allMats().find(function(m){return m.toLowerCase()===n.toLowerCase()});if(f)return f;S.customMats.push(n);return n}
 function checkedMats(){return Array.prototype.map.call($("p-mats").querySelectorAll("input:checked"),function(i){return i.value})}
-function dot(f){return '<span class="dot" style="background:'+esc(f.hex||guessHex(f.color))+'"></span>'}
+function dot(f){return f.img?'<img class="ti sm" src="'+f.img+'" alt="">':'<span class="dot" style="background:'+esc(f.hex||guessHex(f.color))+'"></span>'}
 $("plist").onchange=function(e){
   var t=e.target;if(t.dataset.a!=="tog")return;
   pf(t.dataset.id).active=t.checked;save();renderPrn();renderQ();
@@ -622,14 +697,14 @@ $("plist").onclick=function(e){
   if(b.dataset.a==="mnt"){if(confirm("¿Registrar el mantenimiento y reiniciar el ciclo a 0%?")){var pm=pf(id);pm.mh0=(pm.hv||0)+(pm.hp||0);pm.mts=Date.now();pm.mn=(pm.mn||0)+1;save();renderPrn();renderProd();toast("Ciclo de mantenimiento reiniciado")}return}
   if(b.dataset.a==="edit"){var p=pf(id);editP=id;
     $("p-name").value=p.name;$("p-kw").value=p.kw;$("p-cost").value=p.cost||"";$("p-life").value=p.life||"";$("p-mi").value=p.mi||"";$("p-md").value=p.md||"";updW();$("p-mm").value=p.mm||"none";renderMatBoxes(p.mats);
-    $("ftitle").textContent="Editar impresora";$("p-cancel").style.display="";window.scrollTo(0,document.body.scrollHeight)}
+    pImg=p.img||"";showImg("p",pImg);$("ftitle").textContent="Editar impresora";$("p-cancel").style.display="";window.scrollTo(0,document.body.scrollHeight)}
   if(b.dataset.a==="del"){
     if(S.printers.length<2){toast("Debe quedar al menos una impresora");return}
     if(confirm("¿Eliminar esta impresora? Se enviará a la Papelera.")){toTrash("printer",pf(id),pf(id).name);S.printers=S.printers.filter(function(x){return x.id!==id});
       save();renderPrn();renderQ();toast("Eliminada")}
   }
 };
-function clearP(){editP=null;$("p-name").value="";$("p-kw").value="0.15";$("p-cost").value="";$("p-life").value="";$("p-mi").value="250";$("p-md").value="";updW();$("p-mm").value="none";renderMatBoxes(["PLA","PETG"]);$("ftitle").textContent="Agregar impresora";$("p-cancel").style.display="none"}
+function clearP(){editP=null;pImg="";showImg("p","");$("p-name").value="";$("p-kw").value="0.15";$("p-cost").value="";$("p-life").value="";$("p-mi").value="250";$("p-md").value="";updW();$("p-mm").value="none";renderMatBoxes(["PLA","PETG"]);$("ftitle").textContent="Agregar impresora";$("p-cancel").style.display="none"}
 $("p-cancel").onclick=clearP;
 $("p-addmat").onclick=function(){var n=addMat($("p-newmat").value);if(!n)return;var ch=checkedMats();if(ch.indexOf(n)<0)ch.push(n);renderMatBoxes(ch);fillTypes();$("p-newmat").value="";save();toast("Material añadido")};
 $("p-save").onclick=function(){
@@ -643,6 +718,11 @@ $("p-save").onclick=function(){
   if(editP){var p=pf(editP),was=p.mi>0||p.md>0;p.name=name;p.kw=kw;p.wear=wear;p.cost=cost;p.life=life;p.mi=mi;p.md=md;p.mats=mats;p.mm=$("p-mm").value;
     if(!was&&(mi>0||md>0)){p.mh0=(p.hv||0)+(p.hp||0);p.mts=Date.now()}}
   else{var id="p"+Date.now();S.printers.push({id:id,name:name,kw:kw,wear:wear,cost:cost,life:life,mi:mi,md:md,mh0:0,mts:Date.now(),mn:0,hv:0,hp:0,active:true,mats:mats,mm:$("p-mm").value});S.sel=id;S.fil=""}
+  var pt=editP?pf(editP):S.printers[S.printers.length-1],oi=pt.img||"";
+  if(pImg!==oi){
+    if(pImg&&!imgFits(oi,pImg))toast("Las fotos del catálogo ya ocupan mucho espacio para el respaldo en la nube: quita otra foto o usa una más pequeña");
+    else if(pImg)pt.img=pImg;else delete pt.img;
+  }
   save();renderPrn();renderQ();clearP();toast("Impresora guardada");
 };
 
@@ -651,12 +731,46 @@ $("p-save").onclick=function(){
 function upGcost(){var w=num($("f-weight").value),p=num($("f-price").value);$("f-gcost").textContent=(w>0&&p>0)?"Costo por gramo: "+mxn(p/w)+" ("+mxn(p/w*1000)+"/kg)":""}
 $("f-color").oninput=function(){var h=HEX[$("f-color").value.trim().toLowerCase()];if(h)$("f-hex").value=h};
 $("f-price").oninput=upGcost;$("f-weight").oninput=upGcost;
+function stockLow(f){var rs=rolls(f);return !rs.length||rs.some(function(r){return r.g<150})}
+function ffMatch(f){
+  var u=S.ui.fl,q=(u.q||"").trim().toLowerCase();
+  if(u.st==="a"&&!f.active)return false;if(u.st==="p"&&f.active)return false;if(u.st==="l"&&!stockLow(f))return false;
+  if(u.t&&f.type!==u.t)return false;if(u.s&&f.sub!==u.s)return false;if(u.b&&f.brand!==u.b)return false;
+  if(q&&(fname(f)+" "+f.type+" "+f.sub+" "+f.brand+" "+f.color).toLowerCase().indexOf(q)<0)return false;
+  return true;
+}
+function ffChips(){
+  var u=S.ui.fl,ts=[],ss=[],bs=[];
+  S.filaments.forEach(function(f){
+    if(ts.indexOf(f.type)<0)ts.push(f.type);
+    if((!u.t||f.type===u.t)&&ss.indexOf(f.sub)<0)ss.push(f.sub);
+    if(bs.indexOf(f.brand)<0)bs.push(f.brand);
+  });
+  ts.sort();bs.sort();ss.sort(function(a,b){return subSort({sub:a},{sub:b})});
+  if(u.t&&ts.indexOf(u.t)<0)u.t="";if(u.s&&ss.indexOf(u.s)<0)u.s="";if(u.b&&bs.indexOf(u.b)<0)u.b="";
+  $("ff-st").innerHTML=chipsHtml([["a","Disponibles"],["p","Pausados"],["l","Stock bajo"]],u.st,"st");
+  $("ff-t").innerHTML=chipsHtml(ts.map(function(x){return [x,x]}),u.t,"t");
+  $("ff-s").innerHTML=chipsHtml(ss.map(function(x){return [x,x]}),u.s,"s");
+  $("ff-b").innerHTML=chipsHtml(bs.map(function(x){return [x,x]}),u.b,"b");
+}
+$("ff-bar").onclick=function(e){var b=e.target.closest(".chp");if(!b)return;var u=S.ui.fl,g=b.dataset.g,v=b.dataset.v;u[g]=u[g]===v?"":v;if(g==="t")u.s="";saveUi();renderFil()};
+$("ff-q").oninput=function(){S.ui.fl.q=this.value;saveUi();renderFil()};
+$("ff-clr").onclick=function(){S.ui.fl={q:"",st:"",t:"",s:"",b:""};$("ff-q").value="";saveUi();renderFil()};
+function brandChips(){
+  var bs=[];S.filaments.forEach(function(f){if(bs.indexOf(f.brand)<0)bs.push(f.brand)});bs.sort();
+  $("f-brands").innerHTML=bs.map(function(b){return '<button type="button" class="chp" data-b="'+esc(b)+'">'+esc(b)+'</button>'}).join("");
+}
+$("f-brands").onclick=function(e){var b=e.target.closest(".chp");if(b)$("f-brand").value=b.dataset.b};
 function renderFil(){
-  $("flist").innerHTML=S.filaments.length?S.filaments.map(function(f){
-    return '<div class="pr'+(f.active?"":" off")+'"><div class="top"><div class="i"><b>'+dot(f)+esc(fname(f))+'</b><small>'+mxn(f.price)+' / '+f.weight+' g · <span style="color:var(--ok)">'+mxn(gcost(f))+'/g</span></small></div>'+
+  ffChips();brandChips();
+  var L=S.filaments.filter(ffMatch);
+  $("ff-n").textContent=L.length+" de "+S.filaments.length+" filamentos";
+  $("flist").innerHTML=L.length?L.map(function(f){
+    var th=f.img?'<img class="ti thb" src="'+f.img+'" alt="">':'<span class="ti thb" style="background:'+esc(f.hex||guessHex(f.color))+'"></span>';
+    return '<div class="pr'+(f.active?"":" off")+'"><div class="top">'+th+'<div class="i"><b>'+esc(fname(f))+'</b><small>'+mxn(f.price)+' / '+f.weight+' g · <span style="color:var(--ok)">'+mxn(gcost(f))+'/g</span></small></div>'+
     '<label class="sw"><input type="checkbox" data-a="tog" data-id="'+f.id+'"'+(f.active?" checked":"")+'><i></i>'+(f.active?"Disponible":"Pausado")+'</label></div>'+
     rollsHtml(f)+'<div class="acts"><button class="sec" data-a="edit" data-id="'+f.id+'">✏️ Editar</button><button class="bad" data-a="del" data-id="'+f.id+'">🗑️ Eliminar</button></div></div>';
-  }).join(""):'<div class="hint">Aún no hay filamentos. Agrega el primero abajo.</div>';
+  }).join(""):'<div class="hint">'+(S.filaments.length?"Ningún filamento con estos filtros.":"Aún no hay filamentos. Agrega el primero abajo.")+'</div>';
 }
 $("flist").onchange=function(e){
   var t=e.target;
@@ -672,23 +786,75 @@ $("flist").onclick=function(e){
   if(a0==="addroll"){f0.rolls=f0.rolls||[];f0.rolls.push({id:"r"+Date.now(),g:f0.weight});save();renderFil();renderFilSel();toast("Rollo nuevo agregado");return}
   if(a0==="arch"){var r0=(f0.rolls||[]).find(function(x){return x.id===b.dataset.r});if(r0&&confirm("¿Desechar / archivar este rollo? Sale del stock activo.")){r0.arch=true;save();renderFil();renderFilSel();renderBin();toast("Rollo enviado a la Papelera")}return}
   if(b.dataset.a==="edit"){var f=ff(id);editF=id;
-    $("f-type").value=f.type;$("f-brand").value=f.brand;$("f-color").value=f.color;$("f-hex").value=f.hex||guessHex(f.color);$("f-price").value=f.price;$("f-weight").value=f.weight;upGcost();
+    $("f-type").value=f.type;fillSubs(f.sub);$("f-newsub").value="";$("f-newtype").value="";fImg=f.img||"";showImg("f",fImg);$("f-brand").value=f.brand;$("f-color").value=f.color;$("f-hex").value=f.hex||guessHex(f.color);$("f-price").value=f.price;$("f-weight").value=f.weight;upGcost();
     $("fftitle").textContent="Editar filamento";$("f-cancel").style.display="";window.scrollTo(0,document.body.scrollHeight)}
   if(b.dataset.a==="del"&&confirm("¿Eliminar este filamento? Se enviará a la Papelera.")){
     toTrash("filament",ff(id),fname(ff(id)));S.filaments=S.filaments.filter(function(x){return x.id!==id});
     if(S.fil===id)S.fil="";save();renderFil();renderFilSel();toast("Eliminado")}
 };
-function clearF(){editF=null;$("f-brand").value="";$("f-color").value="";$("f-newtype").value="";$("f-hex").value="#4f9dff";$("f-price").value="";$("f-weight").value="1000";$("f-gcost").textContent="";$("fftitle").textContent="Agregar filamento";$("f-cancel").style.display="none"}
+function clearF(){editF=null;$("f-newsub").value="";fImg="";showImg("f","");fillSubs();$("f-brand").value="";$("f-color").value="";$("f-newtype").value="";$("f-hex").value="#4f9dff";$("f-price").value="";$("f-weight").value="1000";$("f-gcost").textContent="";$("fftitle").textContent="Agregar filamento";$("f-cancel").style.display="none"}
 $("f-cancel").onclick=clearF;
 $("f-save").onclick=function(){
   var price=num($("f-price").value),weight=num($("f-weight").value,1000);
   if(price<=0||weight<=0){toast("Captura precio y peso válidos");return}
   var nt=addMat($("f-newtype").value);
-  var d={type:nt||$("f-type").value,brand:$("f-brand").value.trim()||"Sin marca",color:$("f-color").value.trim()||"Sin color",hex:$("f-hex").value,price:price,weight:weight};
-  if(editF)Object.assign(ff(editF),d);
-  else S.filaments.push(Object.assign({id:"f"+Date.now(),active:true,rolls:[{id:"r"+Date.now(),g:weight}]},d));
+  var ty=nt||$("f-type").value,sb=normSub(ty,$("f-newsub").value||$("f-sub").value);
+  var oi=editF&&ff(editF)?(ff(editF).img||""):"",img=fImg;
+  if(img!==oi&&img&&!imgFits(oi,img)){toast("Las fotos del catálogo ya ocupan mucho espacio para el respaldo en la nube: quita otra foto o usa una más pequeña");img=oi}
+  var d={type:ty,sub:sb,brand:$("f-brand").value.trim()||"Sin marca",color:$("f-color").value.trim()||"Sin color",hex:$("f-hex").value,price:price,weight:weight};
+  var fo=editF?ff(editF):null;
+  if(fo)Object.assign(fo,d);
+  else{fo=Object.assign({id:"f"+Date.now(),active:true,rolls:[{id:"r"+Date.now(),g:weight}]},d);S.filaments.push(fo)}
+  if(img)fo.img=img;else delete fo.img;
   save();fillTypes();renderMatBoxes(checkedMats());renderFil();renderFilSel();clearF();toast("Filamento guardado");
 };
+
+/* ===== Subclases de material e imágenes de catálogo ===== */
+function subOpts(type){
+  var a=(SUBS[type]||["Estándar"]).slice();
+  S.filaments.forEach(function(f){if(f.type===type&&a.indexOf(f.sub)<0)a.push(f.sub)});
+  return a;
+}
+function fillSubs(sel){
+  var t=$("f-type").value,cur=sel!==undefined?sel:$("f-sub").value,a=subOpts(t);
+  $("f-sub").innerHTML=a.map(function(s){return '<option value="'+esc(s)+'">'+esc(s)+'</option>'}).join("");
+  $("f-sub").value=a.indexOf(cur)>-1?cur:a[0];
+}
+$("f-type").onchange=function(){fillSubs()};
+function normSub(t,s){
+  s=String(s||"").trim();if(!s)return "Estándar";
+  var f=subOpts(t).find(function(x){return x.toLowerCase()===s.toLowerCase()});
+  return f||s;
+}
+var fImg="",pImg="";
+function readImgSm(file,cb){ // miniatura comprimida (200 px · JPEG) para no saturar el almacenamiento ni el respaldo en la nube
+  if(!file)return;
+  var fr=new FileReader();
+  fr.onerror=function(){toast("No se pudo leer la imagen")};
+  fr.onload=function(){
+    var im=new Image();
+    im.onerror=function(){toast("Imagen no válida")};
+    im.onload=function(){
+      var M=200,sc=Math.min(1,M/Math.max(im.width,im.height)),c=document.createElement("canvas");
+      c.width=Math.max(1,Math.round(im.width*sc));c.height=Math.max(1,Math.round(im.height*sc));
+      c.getContext("2d").drawImage(im,0,0,c.width,c.height);
+      cb(c.toDataURL("image/jpeg",0.62));
+    };
+    im.src=fr.result;
+  };
+  fr.readAsDataURL(file);
+}
+function imgFits(o,n){return JSON.stringify(synObj()).length-(o||"").length+(n||"").length<900000} /* el respaldo de catálogo viaja en un solo documento de la nube */
+function showImg(k,d){$(k+"-imgv").innerHTML=d?'<img class="ti thb" src="'+d+'" alt="">':'<span class="ti thb">'+(k==="f"?"🧵":"🖨️")+'</span>'}
+function bindImg(k,set){
+  $(k+"-imgb").onclick=function(){$(k+"-imgf").click()};
+  $(k+"-imgcb").onclick=function(){$(k+"-imgc").click()};
+  [k+"-imgf",k+"-imgc"].forEach(function(id){$(id).onchange=function(){readImgSm(this.files[0],set);this.value=""}});
+  $(k+"-imgx").onclick=function(){set("")};
+}
+bindImg("f",function(d){fImg=d;showImg("f",d)});
+bindImg("p",function(d){pImg=d;showImg("p",d)});
+showImg("f","");showImg("p","");
 
 /* Cálculo */
 /* ===== Descuentos por volumen configurables + alerta de riesgo ===== */
@@ -802,9 +968,9 @@ function renderFo(v){
   $("fo-h").textContent=(k.id||k.n)?(L.length?"Pedidos de este cliente: elige uno para entregarlo junto.":"Este cliente aún no tiene pedidos agrupados."):"Escribe o elige el cliente para vincular la cotización a un pedido existente.";
 }
 function ordSum(L,sch){
-  var s={n:L.length,direct:0,cost:0,sh:{n:0,m:0,d:0},eta:0,st:{},cli:""};
+  var s={n:L.length,direct:0,cost:0,lo:0,sh:{n:0,m:0,d:0},eta:0,st:{},cli:""};
   L.forEach(function(e){
-    s.direct+=e.direct;s.cost+=e.cost;
+    s.direct+=e.direct;s.cost+=e.cost;s.lo+=failSum(e);
     var sh=shOf(e);s.sh.n+=e.direct*sh.n/100;s.sh.m+=e.direct*sh.m/100;s.sh.d+=e.direct*sh.d/100;
     var k=e.st||"q";s.st[k]=(s.st[k]||0)+1;
     var t=(k==="a"||k==="p")?sch.eta[e.id]:(k==="c"?0:e.eta);if(t&&t>s.eta)s.eta=t;
@@ -820,6 +986,7 @@ function ordBody(fo,sch){
     rw("💵 Total a cobrar",'<span style="color:var(--ok);max-width:none">'+mxn(s.direct)+'</span>')+
     rw("Costo total",mxn(s.cost))+
     rw("Ganancia neta ("+pct1(mg)+")",(pr<0?"-":"")+mxn(Math.abs(pr)))+
+    (s.lo>0?rw("💸 Pérdidas por fallos",'<span style="color:var(--bad);max-width:none">'+mxn(s.lo)+'</span>')+rw("Ganancia neta tras fallos",(pr-s.lo<0?"-":"")+mxn(Math.abs(pr-s.lo))):"")+
     '<div class="hint" style="margin:8px 0 2px">🤝 Reparto del pedido completo</div>'+
     rw("Naomi",mxn(s.sh.n))+rw("Martha",mxn(s.sh.m))+rw("Diego",mxn(s.sh.d))+
     rw("📅 Entrega conjunta",s.eta?fdt(s.eta):(s.st.c===s.n?"✅ Entregado":"—"));
@@ -909,17 +1076,25 @@ $("calc").onclick=function(){
 /* ===== Proyecto Multi-Pieza ===== */
 function closeCs(){document.querySelectorAll(".cs-list.open").forEach(function(x){x.classList.remove("open")})}
 function tfmt(h,m){return((h?h+" h ":"")+(m?m+" min":"")).trim()||"—"}
-function newPc(){return {id:"x"+Date.now()+Math.random().toString(36).slice(2,5),name:"",pr:S.sel||"",ty:null,co:"",br:"",g:"",h:"",m:"",q:"1"}}
+function newPc(){return {id:"x"+Date.now()+Math.random().toString(36).slice(2,5),name:"",pr:S.sel||"",ty:null,sb:null,co:"",br:"",g:"",h:"",m:"",q:"1"}}
 function pchain(pc){
   var ap=activePrinters();
   if(!ap.some(function(p){return p.id===pc.pr}))pc.pr=ap.length?ap[0].id:"";
+  var lg=legMap(pc.ty);if(lg){pc.ty=lg[0];pc.sb=lg[1]}
   var p=pf(pc.pr),list=compat(p),types=uniq(list,"type");
   if(!pc.ty||!types.some(function(f){return f.type===pc.ty}))pc.ty=types.length?types[0].type:"";
-  var byT=pc.ty?list.filter(function(f){return f.type===pc.ty}):[],cols=uniq(byT,"color");
+  var byT=pc.ty?list.filter(function(f){return f.type===pc.ty}):[];
+  if(pc.sb===undefined||pc.sb===null){ // piezas guardadas antes de las subclases: se deduce por color y marca
+    var m0=byT.find(function(f){return f.color===pc.co&&f.brand===pc.br})||byT.find(function(f){return f.color===pc.co});
+    pc.sb=m0?m0.sub:"";
+  }
+  var subs=uniq(byT,"sub").sort(subSort);
+  if(!subs.some(function(f){return f.sub===pc.sb}))pc.sb=subs.length?subs[0].sub:"";
+  var byS=byT.filter(function(f){return f.sub===pc.sb}),cols=uniq(byS,"color");
   if(!cols.some(function(f){return f.color===pc.co}))pc.co=cols.length?cols[0].color:"";
-  var byC=byT.filter(function(f){return f.color===pc.co}),brs=uniq(byC,"brand");
+  var byC=byS.filter(function(f){return f.color===pc.co}),brs=uniq(byC,"brand");
   if(!brs.some(function(f){return f.brand===pc.br}))pc.br=brs.length?brs[0].brand:"";
-  return {p:p,types:types,cols:cols,brs:brs,fl:byC.find(function(f){return f.brand===pc.br})||null};
+  return {p:p,types:types,subs:subs,cols:cols,brs:brs,fl:byC.find(function(f){return f.brand===pc.br})||null};
 }
 function pcCalc(pc,ch){
   if(!ch.p)return null;
@@ -944,15 +1119,16 @@ function renderPcs(){
     var ch=pchain(pc),d=' data-i="'+i+'"';
     var cur=ch.cols.find(function(f){return f.color===pc.co});
     var pS=ap.length?ap.map(function(p){return '<option value="'+p.id+'"'+(p.id===pc.pr?" selected":"")+'>'+esc(p.name)+'</option>'}).join(""):'<option value="">Sin impresoras activas</option>';
+    var sS=ch.subs.map(function(f){return '<option value="'+esc(f.sub)+'"'+(f.sub===pc.sb?" selected":"")+'>'+esc(f.sub)+'</option>'}).join("");
     var tS=''+ch.types.map(function(f){return '<option value="'+esc(f.type)+'"'+(f.type===pc.ty?" selected":"")+'>'+esc(f.type)+'</option>'}).join("");
     var cL=ch.cols.map(function(f){return '<div class="cs-o" data-i="'+i+'" data-c="'+esc(f.color)+'">'+dot(f)+esc(f.color)+'</div>'}).join("");
     var bS=ch.brs.length?ch.brs.map(function(f){return '<option value="'+esc(f.brand)+'"'+(f.brand===pc.br?" selected":"")+'>'+esc(f.brand)+' — '+mxn(gcost(f))+'/g</option>'}).join(""):'<option value="">—</option>';
     return '<div class="card"><div class="phead"><b>Pieza '+(i+1)+'</b><span><button class="sec xs" data-a="dup"'+d+'>📄 Duplicar</button><button class="bad xs" data-a="rm"'+d+'>🗑️</button></span></div>'+
     '<label>Nombre de la pieza</label><input type="text"'+d+' data-k="name" value="'+esc(pc.name)+'" placeholder="Ej. Cabeza, Manos, Cama 1">'+
     '<label>Impresora</label><select'+d+' data-k="pr">'+pS+'</select>'+
-    '<label>Tipo de material</label><select'+d+' data-k="ty">'+tS+'</select>'+
+    '<label>Material</label><select'+d+' data-k="ty">'+tS+'</select>'+'<label>Subclase / variante</label><select'+d+' data-k="sb"'+(ch.subs.length?"":" disabled")+'>'+sS+'</select>'+
     '<label>Color del filamento</label><div class="cs"><button type="button" class="cs-btn" data-a="cbtn"'+d+(ch.cols.length?"":" disabled")+'>'+(cur?dot(cur)+esc(cur.color):'<span style="color:var(--mut)">—</span>')+'</button><div class="cs-list" id="cl'+i+'">'+cL+'</div></div>'+
-    '<label>Marca del filamento</label><select'+d+' data-k="br"'+(ch.brs.length?"":" disabled")+'>'+bS+'</select>'+
+    '<label>Marca del filamento</label><select'+d+' data-k="br"'+(ch.brs.length?"":" disabled")+'>'+bS+'</select>'+pvRow(ch.p,ch.fl)+
     '<div class="row"><div><label>Peso por pieza (g)</label><input type="number" inputmode="decimal" step="0.1"'+d+' data-k="g" value="'+esc(pc.g)+'"></div><div><label>Cantidad</label><input type="number" inputmode="numeric" min="1"'+d+' data-k="q" value="'+esc(pc.q)+'"></div></div>'+
     '<label>Tiempo de impresión por pieza</label><div class="row"><input type="number" inputmode="numeric" min="0" placeholder="Horas"'+d+' data-k="h" value="'+esc(pc.h)+'"><input type="number" inputmode="numeric" min="0" max="59" placeholder="Minutos"'+d+' data-k="m" value="'+esc(pc.m)+'"></div>'+
     '<div class="gcost" id="pcc-'+i+'"></div></div>';
@@ -1039,7 +1215,7 @@ $("calcp").onclick=function(){
 function hm(dec){var t=Math.round((dec||0)*60);return tfmt(Math.floor(t/60),t%60)}
 function modeName(e){return e.items?"Proyecto multi-placa / multi-pieza":(e.lines?"Impresión avanzada multicolor / multi-material":"Cotización rápida")}
 function mmPrinters(){return activePrinters().filter(isMM)}
-function newAf(){return {id:"a"+Date.now()+Math.random().toString(36).slice(2,5),pr:"",ty:null,co:"",br:"",g:""}}
+function newAf(){return {id:"a"+Date.now()+Math.random().toString(36).slice(2,5),pr:"",ty:null,sb:null,co:"",br:"",g:""}}
 function newPl(){var m=mmPrinters();return {id:"l"+Date.now()+Math.random().toString(36).slice(2,4),pr:m.length?m[0].id:"",h:"",m:"",fs:[newAf(),newAf()]}}
 function renderAdv(){
   var A=S.adv;
@@ -1066,13 +1242,14 @@ function renderAdv(){
       '<label>Tiempo de impresión de la placa</label><div class="row"><input type="number" min="0" inputmode="numeric" placeholder="Horas"'+pd+' data-pk="h" value="'+esc(L.h)+'"><input type="number" min="0" max="59" inputmode="numeric" placeholder="Minutos"'+pd+' data-pk="m" value="'+esc(L.m)+'"></div>';
     L.fs.forEach(function(f,i){
       var d=pd+' data-i="'+i+'"',ch=pchain(f),cur=ch.cols.find(function(x){return x.color===f.co});
+      var sS=ch.subs.map(function(x){return '<option value="'+esc(x.sub)+'"'+(x.sub===f.sb?" selected":"")+'>'+esc(x.sub)+'</option>'}).join("");
       var tS=''+ch.types.map(function(x){return '<option value="'+esc(x.type)+'"'+(x.type===f.ty?" selected":"")+'>'+esc(x.type)+'</option>'}).join("");
       var cL=ch.cols.map(function(x){return '<div class="cs-o"'+d+' data-c="'+esc(x.color)+'">'+dot(x)+esc(x.color)+'</div>'}).join("");
       var bS=ch.brs.length?ch.brs.map(function(x){return '<option value="'+esc(x.brand)+'"'+(x.brand===f.br?" selected":"")+'>'+esc(x.brand)+' — '+mxn(gcost(x))+'/g</option>'}).join(""):'<option value="">—</option>';
       h+='<div class="pr" style="margin-top:10px"><div class="phead"><b>Filamento '+(i+1)+'</b>'+(L.fs.length>2?'<button class="bad xs" data-a="rmf"'+d+'>🗑️</button>':'')+'</div>'+
-        '<label>Tipo de material</label><select'+d+' data-k="ty">'+tS+'</select>'+
+        '<label>Material</label><select'+d+' data-k="ty">'+tS+'</select>'+'<label>Subclase / variante</label><select'+d+' data-k="sb"'+(ch.subs.length?"":" disabled")+'>'+sS+'</select>'+
         '<label>Color del filamento</label><div class="cs"><button type="button" class="cs-btn" data-a="cbtn"'+d+(ch.cols.length?"":" disabled")+'>'+(cur?dot(cur)+esc(cur.color):'<span style="color:var(--mut)">—</span>')+'</button><div class="cs-list" id="al'+pi+'_'+i+'">'+cL+'</div></div>'+
-        '<label>Marca del filamento</label><select'+d+' data-k="br"'+(ch.brs.length?"":" disabled")+'>'+bS+'</select>'+
+        '<label>Marca del filamento</label><select'+d+' data-k="br"'+(ch.brs.length?"":" disabled")+'>'+bS+'</select>'+pvRow(ch.p,ch.fl)+
         '<label>Gramos usados en la placa (g)</label><input type="number" inputmode="decimal" step="0.1"'+d+' data-k="g" value="'+esc(f.g)+'">'+
         '<div class="gcost" id="acc-'+pi+'_'+i+'"></div></div>';
     });
@@ -1360,7 +1537,8 @@ function plBreak(e){
   var now=Date.now(),h='<div class="hint" style="margin:10px 0 2px">🖨️ Asignación de placas</div>';
   pl.forEach(function(x,i){
     var p=pf(x.pid),t=T[tkey(e,i)],st;
-    if(e.st==="c")st="✅ Entregada";
+    if(x.fail)st="⚠️ Fallo reportado";
+    else if(e.st==="c")st="✅ Entregada";
     else if(e.st==="q")st="📝 Cotizada";
     else if(!t||t.st==="i")st="⏳ En espera ("+hm(x.sec/3600)+")";
     else if(t.st==="r")st="⏱️ En curso · quedan "+fm(tleft(t,now));
@@ -1394,7 +1572,7 @@ function dLine(r){
 }
 
 /* ===== Cotizador: canal, limpieza; Producción y entrega estimada ===== */
-function fTC(f){return f.type+(f.color&&f.color!=="Sin color"?" · "+f.color:"")}
+function fTC(f){return mLabel(f)+(f.color&&f.color!=="Sin color"?" · "+f.color:"")}
 function tc(m){var p=String(m||"").split(" · ");return p.length>=3?p[0]+" · "+p.slice(2).join(" · "):p[0]}
 function tcOf(x){return x.matTC||tc(x.mat)}
 function canalInfo(e){var c=e.cx||{},a=[];if(c.ent)a.push(c.ent);if(c.plat)a.push(c.plat);if(c.emp)a.push(c.emp);if(c.dir)a.push(c.dir);return a.map(esc).join(" · ")}
@@ -1448,11 +1626,14 @@ function jobCard(e,sc,n){
   pl.forEach(function(x,i){
     var t=tget(e,i),p=pf(x.pid),k=tkey(e,i),l=tleft(t,now),d=' data-id="'+e.id+'" data-i="'+i+'"',ctl="";
     var pct=t.st==="d"?100:Math.round((1-l/Math.max(1,x.sec))*100);
-    var lbl=t.st==="d"?"✅ Terminada":(t.st==="r"?"⏱️ "+fm(l):(t.st==="z"?"⏸ "+fm(l):"⏳ "+fm(l)));
+    var lbl=x.fail?"⚠️ Fallo":(t.st==="d"?"✅ Terminada":(t.st==="r"?"⏱️ "+fm(l):(t.st==="z"?"⏸ "+fm(l):"⏳ "+fm(l))));
+    var fx="";
+    if(x.fail){var fr=(e.fails||[]).find(function(f){return f.id===x.fail.id});fx='<div class="hint" style="margin-top:6px;color:var(--bad)">⚠️ Fallo reportado'+(fr?": "+fr.g+" g y "+hm(fr.h)+" · pérdida "+mxn(fr.total)+(fr.rep?" · 🔁 reposición en cola":" · sin reposición"):"")+'</div>'}
+    else fx='<div class="btns" style="margin-top:6px">'+(t.st!=="d"?'<button class="sec xs" data-a="mv"'+d+'>🔄 Cambiar impresora / ajustar valores</button>':'')+'<button class="bad xs" data-a="fl"'+d+'>⚠️ Reportar fallo en placa</button></div>';
     if(t.st==="i")ctl='<div class="btns" style="margin-top:6px"><button data-a="start"'+d+'>▶ Preparar e iniciar</button></div>';
     else if(t.st!=="d")ctl='<div class="btns" style="margin-top:6px"><button class="sec" data-a="'+(t.st==="r"?"pause":"resume")+'"'+d+'>'+(t.st==="r"?"⏸ Pausar":"▶ Reanudar")+'</button><button class="sec" data-a="fin"'+d+'>✔ Terminar</button></div>'+
       '<div class="btns" style="margin-top:6px"><button class="sec xs" data-a="adj" data-m="-10"'+d+'>−10 min</button><button class="sec xs" data-a="adj" data-m="-1"'+d+'>−1</button><button class="sec xs" data-a="adj" data-m="1"'+d+'>+1</button><button class="sec xs" data-a="adj" data-m="10"'+d+'>+10 min</button></div><div class="hint" style="margin-top:4px">− adelanta · + atrasa el tiempo restante</div>';
-    h+='<div class="pl"><div class="phead"><b>'+esc(plName(e,i))+'</b><span id="tt-'+k+'" style="font-weight:700">'+lbl+'</span></div><small style="color:var(--mut)">🖨️ '+(p?esc(p.name):"—")+'</small><div class="bar" style="display:block;margin:6px 0"><i id="tb-'+k+'" style="width:'+pct+'%"></i></div>'+ctl+'</div>';
+    h+='<div class="pl"><div class="phead"><b>'+esc(plName(e,i))+'</b><span id="tt-'+k+'" style="font-weight:700">'+lbl+'</span></div><small style="color:var(--mut)">🖨️ '+(p?esc(p.name):"—")+'</small><div class="bar" style="display:block;margin:6px 0"><i id="tb-'+k+'" style="width:'+pct+'%"></i></div>'+ctl+fx+'</div>';
   });
   h+='<div class="acts">'+(anyIdle?'<button data-a="all" data-id="'+e.id+'">▶ Preparar e iniciar todas</button>':'')+(e.st==="p"?'<button class="sec" data-a="nx" data-id="'+e.id+'">✅ Completado y entregado</button>':'')+'</div></div>';
   return h;
@@ -1474,6 +1655,8 @@ $("t-prod").onclick=function(ev){
   if(b&&b.dataset.a!=="view"){
     var e=hf(b.dataset.id);if(!e)return;
     var a=b.dataset.a;
+    if(a==="mv"){mvModal(e,+b.dataset.i);return}
+    if(a==="fl"){flModal(e,+b.dataset.i);return}
     if(a==="nx"){
       var ok=plOf(e).every(function(x,j){var t=T[tkey(e,j)];return t&&t.st==="d"});
       if(!ok&&!confirm("Hay placas sin terminar. ¿Marcar el trabajo como completado de todos modos?"))return;
@@ -1485,6 +1668,227 @@ $("t-prod").onclick=function(ev){
   if(c)showDetail(c.dataset.id);
 };
 setInterval(function(){if($("t-prod").classList.contains("on"))renderProd()},60000);
+/* ===== Producción: cambiar impresora / ajustar valores y registro de fallos por placa ===== */
+function r1(x){return Math.round(x*10)/10}
+function failSum(e){return (e.fails||[]).reduce(function(t,f){return t+f.total},0)}
+function pName(id){var p=pf(id);return p?p.name:"—"}
+/* Datos por placa: gramos por filamento (u) y horas de máquina (h). En cotizaciones anteriores se deducen de use / ph */
+function normPl(e){
+  if(!e.plates||!e.plates.length)e.plates=plOf(e).map(function(x){return {pid:x.pid,name:x.name||"",sec:x.sec}});
+  var pl=e.plates;
+  if(pl.every(function(x){return x.u&&x.h!==undefined}))return pl;
+  var prep=num(S.cfg.prep)*60,use=e.use||[],ph=e.ph||[];
+  pl.forEach(function(x,i){
+    if(!x.u){
+      if(e.lines){x.u=[];(e.fils||[]).forEach(function(f,j){if(f.plate===i+1&&use[j])x.u.push({fid:use[j].fid,g:use[j].g})})}
+      else if(e.items)x.u=use[i]?[{fid:use[i].fid,g:use[i].g}]:[];
+      else x.u=i===0?use.map(function(u){return {fid:u.fid,g:u.g}}):[];
+    }
+    if(x.h===undefined)x.h=ph[i]?ph[i].h:Math.max(0,(x.sec-prep)/3600);
+  });
+  return pl;
+}
+/* El plan (use / ph) se reconstruye desde las placas; una placa con fallo ya no cuenta: su reposición hereda lo planeado */
+function recompPlan(e){
+  var use=[],phm={},names=[];
+  e.plates.forEach(function(x,i){
+    (x.u||[]).forEach(function(u){use.push({fid:u.fid,g:u.g})});
+    if((x.h||0)>0)phm[x.pid]=(phm[x.pid]||0)+x.h;
+    if(!x.fail){
+      var p=pf(x.pid);
+      if(p){if(names.indexOf(p.name)<0)names.push(p.name);if(e.items&&e.items[i]&&!x.rep)e.items[i].printer=p.name}
+    }
+  });
+  e.use=use;
+  e.ph=Object.keys(phm).map(function(pid){return {pid:pid,h:Math.round(phm[pid]*10000)/10000}});
+  if(names.length)e.printer=names.join(", ");
+}
+function plSig(e){
+  var m=useAgg(e),k=Object.keys(m).sort().map(function(id){return id+":"+r2(m[id])});
+  var h=(e.ph||[]).slice().sort(function(a,b){return a.pid<b.pid?-1:1}).map(function(x){return x.pid+":"+r2(x.h)});
+  return k.join("|")+"#"+h.join("|");
+}
+/* Aplica un cambio al plan y, si ya estaba descontado, ajusta rollos e insumos (y horas si ya estaba entregado) */
+function planChange(e,mut){
+  normPl(e);
+  var sig0=plSig(e),hadHrs=!!e.hrs,msg="";
+  if(hadHrs)addHrs(e,-1);
+  mut();
+  recompPlan(e);
+  if(plSig(e)!==sig0&&e.ded){restock(e);var bad=deduct(e);if(bad.length)msg=" · stock insuficiente en "+bad.join(", ")}
+  if(hadHrs)addHrs(e,1);
+  e.sy=false;
+  return msg;
+}
+function deductW(w){ // descuenta de los rollos el filamento realmente desperdiciado
+  var d=[];
+  w.forEach(function(u){
+    var f=ff(u.fid);if(!f||u.g<=0)return;
+    var r=pickRoll(f,u.g)||rolls(f).sort(function(a,b){return b.g-a.g})[0];if(!r)return;
+    var g=Math.min(u.g,r.g);r.g=Math.round((r.g-g)*10)/10;d.push({fid:u.fid,rid:r.id,g:g});
+  });
+  return d;
+}
+function restockW(d){(d||[]).forEach(function(x){var f=ff(x.fid),r=f&&(f.rolls||[]).find(function(y){return y.id===x.rid});if(r)r.g=Math.round((r.g+x.g)*10)/10})}
+function afterProd(e){
+  save();saveHist();renderFil();renderPrn();renderFilSel();renderProd();renderHist();schedSync();
+}
+function closeM4(){$("m4").classList.remove("open");lockScroll(false)}
+$("m4x").onclick=closeM4;
+$("m4").onclick=function(ev){if(ev.target===this)closeM4()};
+function etaWith(e,x,pid,sec){ // entrega estimada si la placa x pasara a otra impresora / duración (sin guardar)
+  var o={pid:x.pid,sec:x.sec};x.pid=pid;x.sec=sec;
+  var t=schedule(null).eta[e.id];
+  x.pid=o.pid;x.sec=o.sec;return t;
+}
+
+/* ---- 🔄 Cambiar impresora / ajustar gramos y tiempo de una placa ---- */
+function mvModal(e,i){
+  var pl=normPl(e),x=pl[i];if(!x||x.fail)return;
+  var g0=r1((x.u||[]).reduce(function(t,u){return t+u.g},0)),h0=x.h||0,prep=num(S.cfg.prep)*60;
+  var hh0=Math.floor(h0+1e-9),mm0=Math.round((h0-hh0)*60);if(mm0>=60){hh0++;mm0=0}
+  var curP=pf(x.pid),opts=e.lines?mmPrinters():activePrinters();
+  if(curP&&!opts.some(function(p){return p.id===x.pid}))opts=[curP].concat(opts);
+  $("m4body").innerHTML='<h3>🔄 Cambiar impresora / ajustar valores</h3><div class="hint" style="margin:0 0 8px">'+esc(e.name||"Sin nombre")+' · '+esc(plName(e,i))+'</div>'+
+    '<label>Imprimir esta placa en</label><select id="m4-p">'+opts.map(function(p){return '<option value="'+p.id+'"'+(p.id===x.pid?" selected":"")+'>'+esc(p.name)+(p.id===x.pid?" (actual)":"")+'</option>'}).join("")+'</select><div class="hint" id="m4-w"></div>'+
+    '<label>Gramos de filamento de la placa (g)</label><input id="m4-g" type="number" inputmode="decimal" step="0.1" min="0" value="'+g0+'"><div class="hint">Si la placa usa varios filamentos, el cambio se reparte en proporción.</div>'+
+    '<label>Tiempo de impresión de la placa</label><div class="row"><input id="m4-h" type="number" inputmode="numeric" min="0" placeholder="Horas" value="'+hh0+'"><input id="m4-m" type="number" inputmode="numeric" min="0" max="59" placeholder="Minutos" value="'+mm0+'"></div>'+
+    '<div class="card" id="m4-pv" style="padding:10px;margin-top:10px;background:var(--card2)"></div>'+
+    '<div class="btns"><button id="m4-ok">Guardar cambios</button></div>';
+  function pv(){
+    var np=pf($("m4-p").value),h=Math.max(0,num($("m4-h").value)+num($("m4-m").value)/60),c=S.cfg;
+    function mc(p,hh){return p?hh*(p.kw*c.kwh+p.wear):0}
+    var eta0=schedule(null).eta[e.id],eta1=etaWith(e,x,np?np.id:x.pid,prep+h*3600),warn=[];
+    if(np)(x.u||[]).forEach(function(u){var f=ff(u.fid);if(f&&np.mats.indexOf(cLabel(f))<0)warn.push(fname(f)+" no está marcado como soportado por "+np.name)});
+    $("m4-w").innerHTML=warn.length?'<span style="color:var(--warn)">⚠️ '+warn.map(esc).join("<br>⚠️ ")+'</span>':"";
+    $("m4-pv").innerHTML='<div class="hint" style="margin:0">⏱️ Placa con preparación: <b>'+hm((prep+h*3600)/3600)+'</b> (antes '+hm(x.sec/3600)+')</div>'+
+      '<div class="hint">⚙️ Costo de máquina de la placa (luz + depreciación): <b>'+mxn(mc(curP,h0))+' → '+mxn(mc(np,h))+'</b><br>El precio pactado con el cliente no cambia.</div>'+
+      '<div class="hint" style="color:var(--ok);font-weight:700">📅 Entrega estimada: '+fdt(eta0)+' → '+fdt(eta1)+'</div>';
+    return warn;
+  }
+  ["m4-p","m4-g","m4-h","m4-m"].forEach(function(id){$(id).oninput=pv;$(id).onchange=pv});
+  pv();
+  $("m4-ok").onclick=function(){
+    var np=$("m4-p").value,g=Math.max(0,num($("m4-g").value)),h=Math.max(0,num($("m4-h").value)+num($("m4-m").value)/60);
+    if(h<=0){toast("Captura el tiempo de impresión");return}
+    if(!pf(np)){toast("Elige una impresora");return}
+    var k=tkey(e,i),t=T[k],moved=np!==x.pid,warn=pv();
+    if(moved&&t&&(t.st==="r"||t.st==="z")&&!confirm("Esta placa está en curso o pausada: al cambiar de impresora su temporizador se reinicia en la nueva. ¿Continuar?"))return;
+    if(warn.length&&!confirm("⚠️ "+warn.join("\n")+"\n\n¿Cambiar de todos modos?"))return;
+    var oldSec=x.sec,oldPid=x.pid,oldH=h0,now=Date.now();
+    var msg=planChange(e,function(){
+      if(g0>0){var s=g/g0;(x.u||[]).forEach(function(u){u.g=r1(u.g*s)})}
+      x.pid=np;x.h=Math.round(h*10000)/10000;x.sec=prep+x.h*3600;
+    });
+    var nt=T[k];
+    if(nt&&(nt.st==="r"||nt.st==="z")){
+      if(moved)T[k]={st:"i",left:x.sec};
+      else{nt.left=Math.max(0,tleft(nt,now)+(x.sec-oldSec));if(nt.st==="r")nt.t0=now}
+    }else if(nt&&nt.st==="i")nt.left=x.sec;
+    saveT();
+    (e.adj=e.adj||[]).push({ts:now,pl:plName(e,i),from:oldPid,to:np,g0:g0,g1:r1(g),h0:oldH,h1:x.h});
+    e.eta=schedule(null).eta[e.id]||e.eta;
+    closeM4();afterProd(e);
+    toast("Placa actualizada · entrega estimada: "+fdt(schedule(null).eta[e.id])+msg);
+  };
+  $("m4").classList.add("open");lockScroll(true);
+}
+
+/* ---- ⚠️ Reportar fallo en placa ---- */
+function failCalc(e,i){
+  var x=normPl(e)[i],p=pf(x.pid),c=S.cfg,u=x.u||[];
+  var tot=u.reduce(function(t,y){return t+y.g},0),gu=$("m4-gu").value,gv=Math.max(0,num($("m4-gv").value));
+  var w=[],gt=0,fil=0;
+  if(u.length&&tot>0){
+    var ratio=gu==="p"?Math.min(1,gv/100):gv/tot;
+    u.forEach(function(y){var g=r1(y.g*ratio);gt+=g;w.push({fid:y.fid,g:g});var f=ff(y.fid);fil+=g*(f?gcost(f):c.fil/1000)});
+  }else{gt=gu==="g"?gv:0;fil=gt*c.fil/1000}
+  var tu=$("m4-tu").value,h=tu==="p"?(x.h||0)*Math.min(1,Math.max(0,num($("m4-tv").value))/100):Math.max(0,num($("m4-th").value)+num($("m4-tn").value)/60);
+  var el=h*(p?p.kw:0)*c.kwh,we=h*(p?p.wear:0);
+  return {w:w,gt:gt,h:h,fil:fil,el:el,we:we,total:fil+el+we};
+}
+function flModal(e,i){
+  var pl=normPl(e),x=pl[i];if(!x||x.fail)return;
+  var p=pf(x.pid),tot=r1((x.u||[]).reduce(function(t,u){return t+u.g},0)),rpo=e.lines?mmPrinters():activePrinters();
+  if(p&&!rpo.some(function(q){return q.id===x.pid}))rpo=[p].concat(rpo);
+  $("m4body").innerHTML='<h3>⚠️ Reportar fallo en placa</h3><div class="hint" style="margin:0 0 8px">'+esc(e.name||"Sin nombre")+' · '+esc(plName(e,i))+' · 🖨️ '+(p?esc(p.name):"—")+'<br>La placa era de '+tot+' g y '+hm(x.h||0)+' de impresión.</div>'+
+    '<label>Filamento que alcanzó a gastar</label><div class="row"><input id="m4-gv" type="number" inputmode="decimal" step="0.1" min="0" placeholder="0"><select id="m4-gu"><option value="p">% de la placa</option><option value="g">gramos</option></select></div>'+
+    '<label>Tiempo que trabajó la impresora</label><div class="row"><input id="m4-tv" type="number" inputmode="decimal" step="0.1" min="0" placeholder="0"><select id="m4-tu"><option value="p">% del tiempo</option><option value="t">horas y minutos</option></select></div>'+
+    '<div id="m4-tm" style="display:none"><div class="row" style="margin-top:8px"><input id="m4-th" type="number" inputmode="numeric" min="0" placeholder="Horas"><input id="m4-tn" type="number" inputmode="numeric" min="0" max="59" placeholder="Minutos"></div></div>'+
+    '<label>Motivo (opcional)</label><input id="m4-why" type="text" placeholder="Atasco, despegue de cama, corte de luz…">'+
+    '<label class="chk"><input type="checkbox" id="m4-rq" checked>🔁 Re-encolar una placa de reposición para terminar el pedido</label>'+
+    '<div id="m4-rpb"><label>Imprimir la reposición en</label><select id="m4-rp">'+rpo.map(function(q){return '<option value="'+q.id+'"'+(q.id===x.pid?" selected":"")+'>'+esc(q.name)+'</option>'}).join("")+'</select></div>'+
+    '<div class="card" id="m4-pv" style="padding:10px;margin-top:10px;background:var(--card2)"></div>'+
+    '<div class="btns"><button id="m4-ok" class="bad">Registrar fallo</button></div>';
+  function pv(){
+    var tu=$("m4-tu").value;
+    $("m4-tv").style.display=tu==="p"?"":"none";$("m4-tm").style.display=tu==="t"?"block":"none";
+    $("m4-rpb").style.display=$("m4-rq").checked?"block":"none";
+    var r=failCalc(e,i);
+    $("m4-pv").innerHTML='<div class="hint" style="margin:0">💸 Pérdida estimada: <b style="color:var(--bad);font-size:15px">'+mxn(r.total)+'</b></div>'+
+      '<div class="hint">🧵 Filamento '+mxn(r.fil)+' ('+r1(r.gt)+' g) · ⚡ Luz '+mxn(r.el)+' · 🖨️ Depreciación '+mxn(r.we)+' ('+hm(r.h)+')</div>'+
+      '<div class="hint">Se descuenta del rollo, se suma a las horas de la máquina y a su ciclo de mantenimiento. No cambia el precio pactado.</div>';
+  }
+  ["m4-gv","m4-gu","m4-tv","m4-tu","m4-th","m4-tn","m4-rq"].forEach(function(id){$(id).oninput=pv;$(id).onchange=pv});
+  pv();
+  $("m4-ok").onclick=function(){
+    var r=failCalc(e,i);
+    if(r.gt<=0&&r.h<=0){toast("Captura el filamento gastado y/o el tiempo trabajado");return}
+    var rq=$("m4-rq").checked,rp=$("m4-rp").value,x2=normPl(e)[i],pid=x2.pid,p2=pf(pid),now=Date.now(),fid="f"+now;
+    var wd=r.w.length?deductW(r.w):[];
+    var hv0=p2?(p2.hv||0):0;if(p2&&r.h>0)p2.hv=Math.round((hv0+r.h)*100)/100;
+    var rec={id:fid,ts:now,name:plName(e,i),pid:pid,pn:p2?p2.name:"",g:r1(r.gt),h:Math.round(r.h*10000)/10000,fil:r.fil,el:r.el,we:r.we,total:r.total,why:$("m4-why").value.trim(),rep:rq,wd:wd,hvd:p2?Math.round(((p2.hv||0)-hv0)*100)/100:0};
+    var u0=x2.u,h0=x2.h,s0=x2.sec,msg=planChange(e,function(){
+      x2.fail={id:fid,u0:u0,h0:h0,sec0:s0};x2.u=[];x2.h=0;x2.sec=0;
+      if(rq){
+        e.plates.push({pid:pf(rp)?rp:pid,name:plName(e,i)+" · reposición",sec:s0,u:JSON.parse(JSON.stringify(u0)),h:h0,rep:true,from:i});
+        rec.ri=e.plates.length-1;
+      }
+    });
+    (e.fails=e.fails||[]).push(rec);
+    T[tkey(e,i)]={st:"d",left:0,f:1};saveT();
+    closeM4();afterProd(e);
+    toast("Fallo registrado · pérdida "+mxn(rec.total)+(rq?" · reposición en cola":"")+msg);
+  };
+  $("m4").classList.add("open");lockScroll(true);
+}
+function undoFail(e,fid){
+  var pl=normPl(e),i=-1;pl.forEach(function(x,j){if(x.fail&&x.fail.id===fid)i=j});
+  var rec=(e.fails||[]).find(function(f){return f.id===fid});
+  if(i<0||!rec)return false;
+  if(rec.ri!==undefined){
+    if(rec.ri!==pl.length-1){toast("Deshaz primero los reportes de fallo posteriores");return false}
+    var t=T[tkey(e,rec.ri)];if(t&&t.st!=="i"){toast("La reposición ya inició: no se puede deshacer");return false}
+  }
+  if(!confirm("¿Deshacer este reporte? Se devuelve el filamento al rollo y se restan las horas registradas a la impresora."))return false;
+  var x=pl[i];
+  planChange(e,function(){
+    if(rec.ri!==undefined){pl.pop();delete T[tkey(e,rec.ri)]}
+    x.u=x.fail.u0;x.h=x.fail.h0;x.sec=x.fail.sec0;delete x.fail;
+  });
+  restockW(rec.wd);
+  var p=pf(rec.pid),dh=rec.hvd!==undefined?rec.hvd:rec.h;if(p&&dh>0)p.hv=Math.max(0,Math.round(((p.hv||0)-dh)*100)/100);
+  e.fails=e.fails.filter(function(f){return f.id!==fid});
+  T[tkey(e,i)]={st:"i",left:x.sec};saveT();
+  afterProd(e);toast("Reporte de fallo deshecho");
+  return true;
+}
+/* Pérdidas y ajustes en el detalle de la cotización */
+function prodHtml(e){
+  var fl=e.fails||[],ad=e.adj||[],h="";
+  if(fl.length){
+    var tot=failSum(e);
+    h+='<div class="card" style="padding:12px;background:var(--card2);margin-top:10px;border-color:var(--bad)"><h3 style="margin:0 0 4px">💸 Pérdidas por fallos</h3>'+
+      fl.map(function(f){return '<div class="res"><span>'+esc(f.name)+' · '+esc(f.pn||"")+'<br><small style="color:var(--mut)">'+fdate(f.ts)+' · '+f.g+' g · '+hm(f.h)+(f.why?" · "+esc(f.why):"")+'<br>filamento '+mxn(f.fil)+' · luz '+mxn(f.el)+' · depreciación '+mxn(f.we)+(f.rep?" · 🔁 con reposición":" · sin reposición")+'</small></span><b style="color:var(--bad)">'+mxn(f.total)+'</b></div><div class="btns" style="margin:0 0 8px"><button class="sec xs" data-uf="'+f.id+'" style="width:auto">↩️ Deshacer este reporte</button></div>'}).join("")+
+      rw("Total perdido",'<span style="color:var(--bad);max-width:none">'+mxn(tot)+'</span>')+
+      rw("Ganancia neta tras pérdidas",(e.profit-tot<0?"-":"")+mxn(Math.abs(e.profit-tot)))+
+      '<div class="hint">No altera el precio pactado con el cliente.</div></div>';
+  }
+  if(ad.length)h+='<div class="card" style="padding:12px;background:var(--card2);margin-top:10px"><h3 style="margin:0 0 4px">🔄 Ajustes de producción</h3>'+
+    ad.map(function(a){return '<div class="hint" style="margin:4px 0">'+fdate(a.ts)+' · '+esc(a.pl)+': '+esc(pName(a.from))+' → '+esc(pName(a.to))+' · '+a.g0+' → '+a.g1+' g · '+hm(a.h0)+' → '+hm(a.h1)+'</div>'}).join("")+'</div>';
+  return h;
+}
+
 /* Mensaje al cliente */
 function payLine(r){var h=mxn(r.direct/2);return "💳 *Condiciones de pago*\n• Aceptamos transferencia o efectivo.\n• Anticipo del 50% ("+h+") para iniciar tu proyecto.\n• 50% restante ("+h+") al entregarlo o enviarlo.\n\n"}
 var CLOSE="Quedo atento a cualquier duda. ¡Gracias por tu confianza! 🙌";
@@ -1552,7 +1956,7 @@ $("m3").onclick=function(e){if(e.target===this)closeM3()};
 /* ===== Volver a cotizar ===== */
 function snapForm(){
   var m=S.mode,sn={mode:m};
-  if(m==="q")sn.q={pr:S.sel,ty:S.fType,co:S.fColor,br:S.fBrand,g:$("grams").value,h:$("hrs").value,m:$("mins").value,qty:$("qty").value,ph:$("ph-h").value,pm:$("ph-m").value};
+  if(m==="q")sn.q={pr:S.sel,ty:S.fType,sb:S.fSub,co:S.fColor,br:S.fBrand,g:$("grams").value,h:$("hrs").value,m:$("mins").value,qty:$("qty").value,ph:$("ph-h").value,pm:$("ph-m").value};
   else if(m==="p"){sn.pcs=JSON.parse(JSON.stringify(S.pcs));sn.gh=S.gh;sn.gm=S.gm;sn.gf=S.gf}
   else sn.adv=JSON.parse(JSON.stringify(S.adv));
   sn.sup=JSON.parse(JSON.stringify(S.sup));
@@ -1580,7 +1984,8 @@ function requote(id,edit){
   var mode=sn.mode||"q";
   if(mode==="q"){
     var q=sn.q||{};
-    S.sel=q.pr||S.sel;S.fType=q.ty===undefined?null:q.ty;S.fColor=q.co||"";S.fBrand=q.br||"";
+    S.sel=q.pr||S.sel;S.fType=q.ty===undefined?null:q.ty;S.fSub=q.sb===undefined?"":q.sb;S.fColor=q.co||"";S.fBrand=q.br||"";
+    if(!q.sb){var lgm=legMap(S.fType);if(lgm){S.fType=lgm[0];S.fSub=lgm[1]}else{var mf=S.filaments.find(function(f){return f.type===S.fType&&f.color===S.fColor&&f.brand===S.fBrand})||S.filaments.find(function(f){return f.type===S.fType&&f.color===S.fColor});S.fSub=mf?mf.sub:""}}
     $("grams").value=q.g||"";$("hrs").value=q.h||"";$("mins").value=q.m||"";$("qty").value=q.qty||"1";$("ph-h").value=q.ph||"";$("ph-m").value=q.pm||"";
     renderQ();
   }else if(mode==="p"){
@@ -1633,17 +2038,17 @@ function mPiece(M,type,gTot,qty){
   M.s+=qty*1.5*Math.pow(v/qty,2/3); // huella estimada sobre la cama
 }
 function mDone(M){M.wf=M.g?M.wsum/M.g:1;var a=num(S.sup.area);if(a>0)M.s=a;return M}
-function metricsQ(f,g,q){var M=newM();mPiece(M,f?f.type:"PLA",g*q,q);M.b=1;return mDone(M)}
+function metricsQ(f,g,q){var M=newM();mPiece(M,f?cLabel(f):"PLA",g*q,q);M.b=1;return mDone(M)}
 function metricsP(){
   var M=newM();
-  S.pcs.forEach(function(pc){var ch=pchain(pc),q=Math.max(1,Math.floor(num(pc.q,1)));mPiece(M,ch.fl?ch.fl.type:"PLA",num(pc.g)*q,q);M.b++});
+  S.pcs.forEach(function(pc){var ch=pchain(pc),q=Math.max(1,Math.floor(num(pc.q,1)));mPiece(M,ch.fl?cLabel(ch.fl):"PLA",num(pc.g)*q,q);M.b++});
   return mDone(M);
 }
 function metricsA(){
   var M=newM();
   (S.adv.pl||[]).forEach(function(L){
     var g=0,v=0;
-    L.fs.forEach(function(f){f.pr=L.pr;var ch=pchain(f),x=num(f.g),t=ch.fl?ch.fl.type:"PLA";g+=x;v+=x/dens(t);M.wsum+=x*warp(t)});
+    L.fs.forEach(function(f){f.pr=L.pr;var ch=pchain(f),x=num(f.g),t=ch.fl?cLabel(ch.fl):"PLA";g+=x;v+=x/dens(t);M.wsum+=x*warp(t)});
     M.g+=g;M.v+=v;M.s+=1.5*Math.pow(v,2/3);M.b++;
   });
   M.n=1;return mDone(M);
@@ -1938,11 +2343,12 @@ function famChips(mats){
   }).join("");
 }
 function fillTypes(){
-  var v=$("f-type").value,g=famGroups(allMats());
+  var v=$("f-type").value,g=famGroups(allMats().filter(function(m){return !LEG[m]}));
   $("f-type").innerHTML=FAMS.filter(function(f){return g[f].length}).map(function(f){
     return '<optgroup label="'+f+'">'+g[f].map(function(m){return '<option value="'+esc(m)+'">'+esc(m)+'</option>'}).join("")+'</optgroup>';
   }).join("");
   if(v)$("f-type").value=v;
+  fillSubs();
 }
 function migPr(p){
   if(p.mi===undefined){p.mi=250;p.md=0;p.mh0=(p.hv||0)+(p.hp||0);p.mts=Date.now();p.mn=0}
@@ -1987,13 +2393,42 @@ function hrsHtml(p){
     '<div class="btns" style="margin-top:8px"><button class="sec xs" data-a="hp" data-id="'+p.id+'">+ Agregar tiempo personal</button></div>';
   return h;
 }
+function brandP(p){return String(p.name||"").trim().split(/\s+/)[0]||"—"}
+function prMatch(p){
+  var u=S.ui.pl,q=(u.q||"").trim().toLowerCase();
+  if(u.st==="a"&&!p.active)return false;if(u.st==="p"&&p.active)return false;
+  if(u.st==="m"){var mt=maintInfo(p);if(!(mt.on&&mt.pc>=100))return false}
+  if(u.sy&&(p.mm||"none")!==u.sy)return false;
+  if(u.m&&(p.mats||[]).indexOf(u.m)<0)return false;
+  if(u.b&&brandP(p)!==u.b)return false;
+  if(q&&(p.name+" "+(p.mats||[]).join(" ")+" "+mmLabel(p)).toLowerCase().indexOf(q)<0)return false;
+  return true;
+}
+function chipsHtml(items,cur,grp){return items.map(function(x){return '<button type="button" class="chp'+(cur===x[0]?" on":"")+'" data-g="'+grp+'" data-v="'+esc(x[0])+'">'+esc(x[1])+'</button>'}).join("")}
+function prChips(){
+  var u=S.ui.pl,ms=[],bs=[];
+  S.printers.forEach(function(p){(p.mats||[]).forEach(function(m){if(ms.indexOf(m)<0)ms.push(m)});var b=brandP(p);if(bs.indexOf(b)<0)bs.push(b)});
+  ms.sort();bs.sort();
+  if(u.m&&ms.indexOf(u.m)<0)u.m="";if(u.b&&bs.indexOf(u.b)<0)u.b="";
+  $("pf-st").innerHTML=chipsHtml([["a","Activas"],["p","En pausa"],["m","🔧 Mantenimiento"]],u.st,"st");
+  $("pf-sy").innerHTML=chipsHtml([["none","Monocolor"],["ams","Cambio de filamento"],["dual","Multi-cabezal"]],u.sy,"sy");
+  $("pf-m").innerHTML=chipsHtml(ms.map(function(x){return [x,x]}),u.m,"m");
+  $("pf-b").innerHTML=chipsHtml(bs.map(function(x){return [x,x]}),u.b,"b");
+}
+$("pf-bar").onclick=function(e){var b=e.target.closest(".chp");if(!b)return;var u=S.ui.pl,g=b.dataset.g,v=b.dataset.v;u[g]=u[g]===v?"":v;saveUi();renderPrn()};
+$("pf-q").oninput=function(){S.ui.pl.q=this.value;saveUi();renderPrn()};
+$("pf-clr").onclick=function(){S.ui.pl={q:"",st:"",sy:"",m:"",b:""};$("pf-q").value="";saveUi();renderPrn()};
 function renderPrn(){
-  $("plist").innerHTML=S.printers.map(function(p){
-    return '<div class="pr'+(p.active?"":" off")+'"><div class="top"><div class="i"><b>'+esc(p.name)+'</b>'+badgesP(p)+'<small>'+p.kw+' kW · '+mxn(p.wear)+'/h · '+mmLabel(p)+'</small></div>'+
+  prChips();
+  var L=S.printers.filter(prMatch);
+  $("pf-n").textContent=L.length+" de "+S.printers.length+" impresoras";
+  $("plist").innerHTML=L.length?L.map(function(p){
+    var th=p.img?'<img class="ti thb" src="'+p.img+'" alt="">':'<span class="ti thb">🖨️</span>';
+    return '<div class="pr'+(p.active?"":" off")+'"><div class="top">'+th+'<div class="i"><b>'+esc(p.name)+'</b>'+badgesP(p)+'<small>'+p.kw+' kW · '+mxn(p.wear)+'/h · '+mmLabel(p)+'</small></div>'+
     '<label class="sw"><input type="checkbox" data-a="tog" data-id="'+p.id+'"'+(p.active?" checked":"")+'><i></i>'+(p.active?"Activa":"En pausa")+'</label></div>'+
     hrsHtml(p)+famChips(p.mats)+
     '<div class="acts"><button class="sec" data-a="edit" data-id="'+p.id+'">✏️ Editar</button><button class="bad" data-a="del" data-id="'+p.id+'">🗑️ Eliminar</button></div></div>';
-  }).join("");
+  }).join(""):'<div class="hint">Ninguna impresora con estos filtros.</div>';
 }
 function updW(){
   var c=num($("p-cost").value),l=num($("p-life").value),o=editP?pf(editP):null;
@@ -2004,7 +2439,7 @@ $("p-cost").oninput=updW;$("p-life").oninput=updW;
 /* ===== Historial: métricas, filtros y reportes · Clientes (CRM) · Papelera global ===== */
 var CH=["Presencial","Marketplace","Empresa"];
 var UKEY="cot3d_ui",BKEY="cot3d_trash_v1";
-S.ui={tab:"t-cot",per:"m",q:"",st:"",ch:"",d1:"",d2:""};
+S.ui={tab:"t-cot",per:"m",q:"",st:"",ch:"",d1:"",d2:"",fl:{q:"",st:"",t:"",s:"",b:""},pl:{q:"",st:"",sy:"",m:"",b:""}};
 try{var uu=JSON.parse(localStorage.getItem(UKEY));if(uu)S.ui=Object.assign(S.ui,uu)}catch(e){}
 function saveUi(){try{localStorage.setItem(UKEY,JSON.stringify(S.ui))}catch(e){}}
 S.trash=[];
@@ -2014,6 +2449,7 @@ function lockScroll(on){document.documentElement.classList[on?"add":"remove"]("l
 function initUi(){
   $("fs").innerHTML='<option value="">Todos los estados</option>'+Object.keys(ST).map(function(k){return '<option value="'+k+'">'+ST[k]+'</option>'}).join("");
   $("fc").innerHTML='<option value="">Todos los canales</option>'+CH.map(function(c){return '<option>'+c+'</option>'}).join("");
+  $("ff-q").value=S.ui.fl.q;$("pf-q").value=S.ui.pl.q;
   $("fq").value=S.ui.q;$("fs").value=S.ui.st;$("fc").value=S.ui.ch;$("fd1").value=S.ui.d1;$("fd2").value=S.ui.d2;
   renderHist();renderBin();
 }
@@ -2025,7 +2461,9 @@ function fin(){
   var sm=function(a,k){return a.reduce(function(t,e){return t+(e[k]||0)},0)};
   var d=S.hist.filter(function(e){return e.st==="c"&&inPer(e)}),pl=S.hist.filter(function(e){return e.st==="a"||e.st==="p"});
   var qs=S.hist.filter(inPerQ),won=qs.filter(function(e){return e.st&&e.st!=="q"}).length;
-  return {d:d,inc:sm(d,"direct"),cs:sm(d,"cost"),pipe:sm(pl,"direct"),np:pl.length,nq:qs.length,won:won,conv:qs.length?won/qs.length*100:0};
+  var lo=0,nf=0;
+  S.hist.forEach(function(e){(e.fails||[]).forEach(function(x){if(S.ui.per==="h"||nowMonth(x.ts)){lo+=x.total;nf++}})});
+  return {d:d,inc:sm(d,"direct"),cs:sm(d,"cost"),pipe:sm(pl,"direct"),np:pl.length,nq:qs.length,won:won,conv:qs.length?won/qs.length*100:0,lo:lo,nf:nf};
 }
 function renderStat(){
   var f=fin();
@@ -2034,6 +2472,7 @@ function renderStat(){
   $("hstat").innerHTML='<div class="tiles">'+
     t("💰 Ingresos reales ("+f.d.length+" entregados)",mxn(f.inc))+t("🧾 Costos reales de fabricación",mxn(f.cs))+
     t("📈 Ganancia neta real",mxn(f.inc-f.cs),"var(--ok)")+t("🔄 En cartera ("+f.np+")",mxn(f.pipe),"var(--warn)")+
+    t("💸 Pérdidas por fallos ("+f.nf+")",mxn(f.lo),f.lo>0?"var(--bad)":"")+t("📉 Ganancia neta tras fallos",(f.inc-f.cs-f.lo<0?"-":"")+mxn(Math.abs(f.inc-f.cs-f.lo)),"var(--ok)")+
     t("🎯 Tasa de conversión","<span>"+Math.round(f.conv)+"%</span> <small style='display:inline'>("+f.won+" de "+f.nq+" cotizaciones aprobadas)</small>","",true)+'</div>';
 }
 /* ---- Lista con filtros ---- */
@@ -2053,7 +2492,7 @@ function renderHist(){
   renderOrd(h);
   $("hlist").innerHTML=h.length?h.map(function(e){
     return '<div class="pr hc" data-a="view" data-id="'+e.id+'"><div class="top">'+(e.photo?'<img class="th" src="'+e.photo+'" alt="">':'<div class="th">🖼️</div>')+
-    '<div class="i"><b>'+esc(e.name||"Sin nombre")+'</b><small>'+(e.cli?'👤 '+esc(e.cli)+' · ':'')+fdate(e.ts)+'</small><small>'+badge(e)+(e.fo?' <span class="chip">📦 '+esc(e.fo)+'</span>':"")+'</small><small>'+esc(e.mat)+' · '+e.q+' pza</small><small style="color:var(--ok);font-weight:700;font-size:16px">'+mxn(e.direct)+'</small></div>'+
+    '<div class="i"><b>'+esc(e.name||"Sin nombre")+'</b><small>'+(e.cli?'👤 '+esc(e.cli)+' · ':'')+fdate(e.ts)+'</small><small>'+badge(e)+(e.fo?' <span class="chip">📦 '+esc(e.fo)+'</span>':"")+(e.fails&&e.fails.length?' <span class="chip" style="color:var(--bad);background:#ff6b6b22">⚠️ '+e.fails.length+' fallo'+(e.fails.length>1?"s":"")+'</span>':"")+'</small><small>'+esc(e.mat)+' · '+e.q+' pza</small><small style="color:var(--ok);font-weight:700;font-size:16px">'+mxn(e.direct)+'</small></div>'+
     '<button class="bad xs" data-a="del" data-id="'+e.id+'" style="flex:none">🗑️</button></div>'+
     '<div class="acts"><button class="sec" data-a="req" data-id="'+e.id+'">🔁 Volver a cotizar</button></div></div>';
   }).join(""):'<div class="card hint">'+(S.hist.length?"Ningún resultado con estos filtros.":"Aún no hay cotizaciones. Calcula una en el Cotizador y se guardará aquí automáticamente.")+'</div>';
@@ -2113,7 +2552,7 @@ $("blist").onclick=function(e){
       if(t.kind==="quote"){d.sy=false;d.st="q";d.ded=null;d.dedS=null;d.hrs=false;S.hist.push(d);Y.del=Y.del.filter(function(x){return x!==d.id});saveY();saveHist();schedSync()}
       else if(t.kind==="client")S.clients.push(d);
       else if(t.kind==="printer")S.printers.push(migPr(d));
-      else if(t.kind==="filament")S.filaments.push(d);
+      else if(t.kind==="filament")S.filaments.push(migFil(d));
       else if(t.kind==="supply"){S.supplies.push(d.s);(d.refs||[]).forEach(function(x){var P=pfind(x.pid);if(P)P.items.push(x.item)})}
       else if(t.kind==="profile")S.profiles.push(d);
     }else if(!confirm("¿Eliminar permanentemente? No se podrá recuperar."))return;
@@ -2309,9 +2748,10 @@ function showDetail(id){
     body+=row("Impresora",esc(e.printer))+row("Filamento",esc(e.mat))+row("Piezas",e.q)+row("Peso por pieza",e.g+" g")+row("Tiempo por pieza",tfmt(e.h,e.m))+
       (e.d>0?row("Descuento por volumen","-"+(e.d*100)+"%"):"")+slHtml(e)+tail+row("Precio por pieza",mxn(e.unit))+fin;
   }
-  $("mbody").innerHTML=head+ctl+body+bdHtml(e)+distHtml(e,true)+(e.fo?ordDet(e.fo,sc0):"")+'<div class="btns"><button id="m-req" class="sec">🔁 Volver a cotizar…</button></div>';
+  $("mbody").innerHTML=head+ctl+body+bdHtml(e)+distHtml(e,true)+prodHtml(e)+(e.fo?ordDet(e.fo,sc0):"")+'<div class="btns"><button id="m-req" class="sec">🔁 Volver a cotizar…</button></div>';
   $("mwa").textContent=waLabel(e);
   $("m-req").onclick=function(){closeModal();askLoad(e.id)};
+  Array.prototype.forEach.call($("mbody").querySelectorAll("[data-uf]"),function(b){b.onclick=function(){if(undoFail(e,b.dataset.uf))showDetail(e.id)}});
   $("m-fo").onchange=function(){
     var v=this.value;e.fo=v==="__new"?nextFolio():v;if(e.snap)e.snap.fo=e.fo;e.sy=false;
     saveHist();renderHist();schedSync();toast(e.fo?"Vinculada al pedido "+e.fo:"Pedido desvinculado");showDetail(e.id);
@@ -2433,7 +2873,7 @@ function syncAll(manual){
     cdoc=d;prog(15,"Descargando perfiles…");
     var cts=d&&d.fields?+d.fields.ts.integerValue:0,c=d?rd(d):null;
     if(c&&Array.isArray(c.printers)&&c.printers.length&&cts>S.mod){ // la nube es más reciente: restaurar
-      S.cfg=Object.assign({},DEF_CFG,c.cfg);S.printers=c.printers.map(migPr);S.filaments=(c.filaments||[]).map(function(f){if(!f.rolls)f.rolls=[{id:"r"+f.id,g:f.weight}];return f});S.customMats=c.customMats||[];S.clients=c.clients||S.clients;S.supplies=c.supplies||S.supplies;S.profiles=c.profiles||S.profiles;
+      S.cfg=Object.assign({},DEF_CFG,c.cfg);S.printers=c.printers.map(migPr);S.filaments=(c.filaments||[]).map(migFil);S.customMats=c.customMats||[];S.clients=c.clients||S.clients;S.supplies=c.supplies||S.supplies;S.profiles=c.profiles||S.profiles;
       S.mod=cts;S.dirty=false;S.lastSP=synPart();cdoc=true;
     }
     return listHist("",[]);
